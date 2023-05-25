@@ -90,7 +90,7 @@ int minimax(std::vector<std::vector<char>>& board, int depth, Game_info& info, b
             auto available_moves = get_available_moves(board);
 			if (min_flag) {
 				res_score = INT_MIN;
-                for (int i = 0; i < available_moves.size(); ++i) {
+                for (int i = 0; i < static_cast<int>(available_moves.size()); ++i) {
                     int row = available_moves[i] / 3, column = available_moves[i] % 3;
                     board[row][column] = info.ai_symb;
                     cur_score = minimax(board, depth + 1, info);
@@ -99,7 +99,7 @@ int minimax(std::vector<std::vector<char>>& board, int depth, Game_info& info, b
                 }
 			} else {
 				res_score = INT_MAX;
-                for (int i = 0; i < available_moves.size(); ++i) {
+                for (int i = 0; i < static_cast<int>(available_moves.size()); ++i) {
                     int row = available_moves[i] / 3, column = available_moves[i] % 3;
                     board[row][column] = info.hum_symb;
                     cur_score = minimax(board, depth + 1, info, true);
@@ -113,7 +113,7 @@ int minimax(std::vector<std::vector<char>>& board, int depth, Game_info& info, b
     return 0;
 }
 
-int ai_random_choice(std::vector<std::vector<char>>& board, Game_info& info) {
+int ai_random_choice(std::vector<std::vector<char>>& board) {
     while (true) {
         int pos = rand() % 9;
         if (board[pos / 3][pos % 3] == ' ') {
@@ -131,7 +131,7 @@ int find_best_ai_move(std::vector<std::vector<char>>& board, Game_info& info) {
         return rand() % 9;
     }
     auto available_moves = get_available_moves(board);
-    for (int i = 0; i < available_moves.size(); ++i) {
+    for (int i = 0; i < static_cast<int>(available_moves.size()); ++i) {
         int row = available_moves[i] / 3, column = available_moves[i] % 3;
         board[row][column] = info.ai_symb;
         cur_score = minimax(board, info.steps + 1, info, false);
@@ -148,7 +148,7 @@ void play(Game_info& info) {
     std::vector<std::vector<std::vector<char>>> board(3,
         std::vector<std::vector<char>>(3, std::vector<char>(3, ' ')));
 	int row = 0, column = 0, pos;
-    char pos_str;
+    char pos_str, ans;
     info.steps = 0;
     while (true) {
         if (info.cur_player == HUMAN) {
@@ -165,7 +165,12 @@ void play(Game_info& info) {
                     pos = pos_str - '0';
                     --pos;
                     if (pos < 0 || pos > 8) {
-                        std::cout << "Invalid position. Try again\n";
+                        std::cout << "Invalid position\n";
+                        std::cout << "Continue (y/n): ";
+                        std::cin >> ans;
+                        if (ans == 'n') {
+                            exit(0);
+                        }
                         continue;
                     }
                     row = pos / 3, column = pos % 3;
@@ -188,7 +193,7 @@ void play(Game_info& info) {
         } else {
             for (int k = 0; k < 3; ++k) {
                 pos = find_best_ai_move(board[k], info);
-                // pos = ai_random_choice(board[k], info);
+                // pos = ai_random_choice(board[k]);
                 row = pos / 3, column = pos % 3;
                 board[k][row][column] = info.ai_symb;
                 if (check_win(board[k])) {
